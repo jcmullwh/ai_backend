@@ -105,8 +105,8 @@ docs = [
 [tool.pdm.scripts]
 test = "pytest"
 test-cov-xml = "pytest --cov-report=xml"
-lint = "scripts/lint.bat" # or "lint.bat" for Windows
-lint-check = "scripts/lint-check.bat" # or "lint-check.bat" for Windows
+lint = "python scripts/lint.py"
+lint-check = "python scripts/lint_check.py"
 docs-serve = "mkdocs serve"
 docs-build = "mkdocs build"
 

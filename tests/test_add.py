@@ -1,5 +1,6 @@
 import pytest
-from ai_backend import add
+
+from src.ai_backend import add
 
 
 @pytest.mark.parametrize(
@@ -11,4 +12,4 @@ from ai_backend import add
     ],
 )
 def test_add(a: int, b: int, result: int):
-    assert add(a, b) == result
+    assert add(a, b) == result  # noqa: S101
