@@ -2,6 +2,7 @@
 
 __version__ = "0.0.0"
 
+
 def add(a: int, b: int) -> int:
     """
     Add two integers.

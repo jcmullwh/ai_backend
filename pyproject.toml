@@ -106,7 +106,7 @@ docs = [
 test = "pytest"
 test-cov-xml = "pytest --cov-report=xml"
 lint = "scripts/lint.py"
-lint-check = "scripts/lint_check.py"
+lint-check = "scripts/lint-check.py"
 docs-serve = "mkdocs serve"
 docs-build = "mkdocs build"
 
