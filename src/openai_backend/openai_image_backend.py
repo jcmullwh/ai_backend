@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from base.ai_base import ConfigManager, OpenAIBackend
 from base.ai_interface_base import ImageInterface
@@ -8,26 +8,26 @@ class OpenAIImageConfigManager(ConfigManager):
     def __init__(self, **kwargs: dict[str, Any]) -> None:
         super().__init__()
         # Initialize default configurations for image generation operations
-        self.config = {"image_generation": {"model": "dall-e-3", "size": "1024x1792", "quality": "hd"}}
+        self.config = {
+            "image_generation": {
+                "model": "dall-e-3",
+                "size": "1024x1792",
+                "quality": "hd",
+                "n": 1,
+            }
+        }
         self.update_config(**kwargs)
 
 
 class OpenAIImageBackend(ImageInterface, OpenAIBackend):
-    def __init__(self, api_key: str) -> None:
+    def __init__(self, api_key: Optional[str] = None) -> None:
         super().__init__(OpenAIImageConfigManager(), api_key)
 
     def generate_image(self, prompt: str, **kwargs: dict[str, Any]) -> Any:
         config = self.config_manager.combine_config("image_generation", **kwargs)
 
         try:
-            response = self.client.images.generate(
-                model=config["model"],
-                prompt=prompt,
-                size=config["size"],
-                quality=config["quality"],
-                style=config["style"],
-                n=config["num_images"],
-            )
+            response = self.client.images.generate(prompt=prompt, **config)
             return response.data[0].url
         except Exception as e:
             self.log_error("Image generation API error", e)

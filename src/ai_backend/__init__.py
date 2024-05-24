@@ -4,6 +4,6 @@ __author__ = """Jason"""
 __email__ = "na"
 __version__ = "0.1.0"
 
-from .api import TextAI
+from .api import AudioAI, ImageAI, TextAI
 
-__all__ = ["TextAI"]
+__all__ = ["TextAI", "ImageAI", "AudioAI"]
