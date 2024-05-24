@@ -92,6 +92,7 @@ asyncio_mode = "strict"
 markers = [
     "live_api: mark a test as a live API test to run only on demand."
 ]
+testpaths = ["tests"]
 
 
 [tool.pdm.dev-dependencies]
@@ -117,7 +118,7 @@ docs = [
 [tool.pdm.scripts]
 test = "pytest -m 'not live_api'"
 test-live = "pytest -m live_api"
-test-cov-xml = "pytest --cov-report=xml"
+test-cov-xml = "pytest -m 'not live_api' --cov-report=xml"
 lint = "scripts/lint.py"
 lint-check = "scripts/lint-check.py"
 docs-serve = "mkdocs serve"
