@@ -13,8 +13,8 @@ class OpenAITextConfigManager(ConfigManager):
 
 
 class OpenAITextBackend(OpenAIBackend, TextInterface):
-    def __init__(self, config_manager: OpenAITextConfigManager, api_key: Optional[str] = None) -> None:
-        super().__init__(config_manager, api_key)
+    def __init__(self, api_key: Optional[str] = None) -> None:
+        super().__init__(OpenAITextConfigManager(), api_key)
 
     def text_chat(self, messages: list, **kwargs: dict[str, Any]) -> Any:
         config = self.config_manager.combine_config("chat", **kwargs)

@@ -1,8 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
-
-from src.openai_backend.openai_text_backend import OpenAITextBackend, OpenAITextConfigManager
+from openai_backend.openai_text_backend import OpenAITextBackend
 
 
 @pytest.fixture
@@ -31,25 +30,44 @@ def mock_openai_client():
 
 
 @pytest.fixture
-def config_manager():
-    # Create an instance of the OpenAITextConfigManager with default settings
-    return OpenAITextConfigManager()
+def text_backend(mock_openai_client):
+    with patch("openai_backend.openai_text_backend.OpenAITextBackend.create_client", return_value=mock_openai_client):
+        backend = OpenAITextBackend()
+        yield backend
 
 
-@pytest.fixture
-def text_backend(mock_openai_client, config_manager):
-    # Create an instance of the OpenAITextBackend
-    with patch(
-        "src.openai_backend.openai_text_backend.OpenAITextBackend.create_client", return_value=mock_openai_client
-    ):
-        backend = OpenAITextBackend(config_manager=config_manager)
-        return backend
-
-
-def test_text_chat_success(text_backend):
+def test_text_chat_success(text_backend, mock_openai_client):
     # Test successful text chat
-    response = text_backend.text_chat(["Hello, OpenAI!"])
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Hello, OpenAI!"},
+    ]
+
+    response = text_backend.text_chat(messages)
     assert response == "\n\nHello there, how may I assist you today?"
+
+    # Verify that the chat.completions.create method was called with the correct arguments
+    mock_openai_client.chat.completions.create.assert_called_once_with(
+        messages=messages, **text_backend.config_manager.config["chat"]
+    )
+
+
+def test_text_modified_config(text_backend, mock_openai_client):
+    # Test successful text chat
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Hello, OpenAI!"},
+    ]
+
+    response = text_backend.text_chat(messages, model="gpt-7", sassiness=11)
+    assert response == "\n\nHello there, how may I assist you today?"
+
+    modified_config = text_backend.config_manager.config["chat"].copy()
+    modified_config["model"] = "gpt-7"
+    modified_config["sassiness"] = 11
+
+    # Verify that the chat.completions.create method was called with the correct arguments
+    mock_openai_client.chat.completions.create.assert_called_once_with(messages=messages, **modified_config)
 
 
 def test_text_chat_exception(text_backend):

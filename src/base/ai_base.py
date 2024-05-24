@@ -194,7 +194,8 @@ class AIBackend(ABC):
             env_var_name = self.get_env_var_name()
             api_key = os.getenv(env_var_name)
             if not api_key:
-                error = f"{env_var_name} is not set."
+                error = f"{env_var_name} is not set. You need to set this environment \
+                    variable or provide the API key as an argument."
                 logger.error(error)
                 raise ValueError(error)
 

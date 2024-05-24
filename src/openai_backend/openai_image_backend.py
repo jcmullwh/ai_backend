@@ -13,8 +13,8 @@ class OpenAIImageConfigManager(ConfigManager):
 
 
 class OpenAIImageBackend(ImageInterface, OpenAIBackend):
-    def __init__(self, api_key: str, config_manager: OpenAIImageConfigManager) -> None:
-        super().__init__(config_manager, api_key)
+    def __init__(self, api_key: str) -> None:
+        super().__init__(OpenAIImageConfigManager(), api_key)
 
     def generate_image(self, prompt: str, **kwargs: dict[str, Any]) -> Any:
         config = self.config_manager.combine_config("image_generation", **kwargs)

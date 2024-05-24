@@ -1,28 +1,28 @@
 # base/backend_manager.py
-from typing import Any
+from typing import Any, Optional
 
-from base.ai_base import ConfigManager
-from base.ai_interface_base import ImageInterface
-from openai_backend.openai_image_backend import OpenAIImageBackend, OpenAIImageConfigManager
+from base.ai_interface_base import TextInterface
+from openai_backend.openai_text_backend import OpenAITextBackend
 
 
 class BackendManager:
     def __init__(self) -> None:
         self.backends: dict[str, Any] = {
-            "openai": OpenAIImageBackend,
+            "openai": OpenAITextBackend,
             # Add other backends here
         }
-        self.current_backend: ImageInterface = OpenAIImageBackend("", OpenAIImageConfigManager())
+        # Default Backend
+        self.current_backend: TextInterface = OpenAITextBackend()
 
-    def set_backend(self, backend_name: str, api_key: str, config_manager: ConfigManager) -> None:
+    def set_backend(self, backend_name: str, api_key: Optional[str] = None) -> Any:
         if backend_name in self.backends:
             backend_class = self.backends[backend_name]
-            self.current_backend = backend_class(api_key, config_manager)
+            return backend_class(api_key)
         else:
             error_message = f"Backend {backend_name} not supported."
             raise ValueError(error_message)
 
-    def get_backend(self) -> ImageInterface:
+    def get_backend(self) -> TextInterface:
         if not self.current_backend:
             error_message = "No backend is currently set."
             raise ValueError(error_message)

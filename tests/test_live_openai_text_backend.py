@@ -1,12 +1,10 @@
 import pytest
-
-from src.openai_backend.openai_text_backend import OpenAITextBackend, OpenAITextConfigManager
+from openai_backend.openai_text_backend import OpenAITextBackend
 
 
 @pytest.mark.live_api
 def test_live_text_chat():
-    config_manager = OpenAITextConfigManager()
-    text_backend = OpenAITextBackend(config_manager=config_manager)
+    text_backend = OpenAITextBackend()
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Hello, OpenAI!"},
