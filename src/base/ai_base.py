@@ -182,7 +182,14 @@ class ConfigManager:
 
 
 class AIBackend(ABC):
-    def __init__(self, api_key: Optional[str], config_manager: ConfigManager) -> None:
+    def __init__(self, config_manager: ConfigManager, api_key: Optional[str]) -> None:
+        if not isinstance(config_manager, ConfigManager):
+            config_manager_error = "config_manager must be an instance of ConfigManager"
+            raise TypeError(config_manager_error)
+        if not isinstance(api_key, (str, type(None))):
+            api_key_error = "api_key must be a string or None"
+            raise TypeError(api_key_error)
+
         if not api_key:
             env_var_name = self.get_env_var_name()
             api_key = os.getenv(env_var_name)
@@ -214,8 +221,8 @@ class AIBackend(ABC):
 
 
 class OpenAIBackend(AIBackend):
-    def __init__(self, api_key: Optional[str], config_manager: ConfigManager) -> None:
-        super().__init__(api_key, config_manager)
+    def __init__(self, config_manager: ConfigManager, api_key: Optional[str]) -> None:
+        super().__init__(config_manager, api_key)
 
     def get_env_var_name(self) -> str:
         return "OPENAI_API_KEY"

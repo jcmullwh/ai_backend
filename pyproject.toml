@@ -82,9 +82,16 @@ ignore = [
     "PLR0915",
 ]
 
+[tool.ruff.per-file-ignores]
+# Ignore assert statements in test files
+"tests/test_*.py" = ["S101"]
+
 [tool.pytest.ini_options]
 addopts = "--cov=ai_backend/ --cov-report=term-missing"
 asyncio_mode = "strict"
+markers = [
+    "live_api: mark a test as a live API test to run only on demand."
+]
 
 
 [tool.pdm.dev-dependencies]
@@ -108,7 +115,8 @@ docs = [
 
 
 [tool.pdm.scripts]
-test = "pytest"
+test = "pytest -m 'not live_api'"
+test-live = "pytest -m live_api"
 test-cov-xml = "pytest --cov-report=xml"
 lint = "scripts/lint.py"
 lint-check = "scripts/lint-check.py"

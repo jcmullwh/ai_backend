@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from base.ai_base import ConfigManager, OpenAIBackend
 from base.ai_interface_base import TextInterface
@@ -13,15 +13,15 @@ class OpenAITextConfigManager(ConfigManager):
 
 
 class OpenAITextBackend(OpenAIBackend, TextInterface):
-    def __init__(self, api_key: str, config_manager: OpenAITextConfigManager) -> None:
-        super().__init__(api_key, config_manager)
+    def __init__(self, config_manager: OpenAITextConfigManager, api_key: Optional[str] = None) -> None:
+        super().__init__(config_manager, api_key)
 
     def text_chat(self, messages: list, **kwargs: dict[str, Any]) -> Any:
         config = self.config_manager.combine_config("chat", **kwargs)
 
         try:
-            response = self.client.chat.create(messages, config)
-            return response.choices[0].message
+            response = self.client.chat.completions.create(messages=messages, **config)
+            return response.choices[0].message.content
         except Exception as e:
             self.log_error("OpenAI Chat API error", e)
             return None
