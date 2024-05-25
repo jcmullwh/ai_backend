@@ -22,8 +22,8 @@ class OpenAIAudioConfigManager(ConfigManager):
 
 
 class OpenAIAudioBackend(AudioInterface, OpenAIBackend):
-    def __init__(self, api_key: Optional[str] = None) -> None:
-        super().__init__(OpenAIAudioConfigManager(), api_key)
+    def __init__(self, api_key: Optional[str] = None, **kwargs: dict[str, Any]) -> None:
+        super().__init__(OpenAIAudioConfigManager(**kwargs), api_key)
 
     def voice_to_text(
         self,

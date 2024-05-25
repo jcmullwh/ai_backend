@@ -13,8 +13,8 @@ class OpenAITextConfigManager(ConfigManager):
 
 
 class OpenAITextBackend(OpenAIBackend, TextInterface):
-    def __init__(self, api_key: Optional[str] = None) -> None:
-        super().__init__(OpenAITextConfigManager(), api_key)
+    def __init__(self, api_key: Optional[str] = None, **kwargs: dict[str, Any]) -> None:
+        super().__init__(OpenAITextConfigManager(**kwargs), api_key)
 
     def text_chat(self, messages: list, **kwargs: dict[str, Any]) -> Any:
         config = self.config_manager.combine_config("chat", **kwargs)
@@ -30,7 +30,7 @@ class OpenAITextBackend(OpenAIBackend, TextInterface):
         config = self.config_manager.combine_config("embedding", **kwargs)
         model = config.get("model")
         try:
-            response = self.client.embeddings.create(model=model, input=messages)
+            response = self.client.embeddings.create(model=model, input=messages, **config)
             return response.data[0]["embedding"]
         except Exception as e:
             self.log_error("OpenAI Embedding API error", e)

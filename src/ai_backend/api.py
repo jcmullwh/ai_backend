@@ -5,7 +5,9 @@ from ai_backend.backend_manager import BackendManager
 
 
 class TextAI:
-    def __init__(self, backend_name: Optional[str] = None, api_key: Optional[str] = None) -> None:
+    def __init__(
+        self, backend_name: Optional[str] = None, api_key: Optional[str] = None, **kwargs: dict[str, Any]
+    ) -> None:
         """Initialize a TextAI instance with an optional backend and API key.
         If no backend is specified, the default backend is used.
         If no API key is specified, it is retrieved from the environment variables.
@@ -18,8 +20,8 @@ class TextAI:
         """
         self.backend_manager = BackendManager()
         self.backend_type = "text"
-        if backend_name:
-            self.backend = self.backend_manager.set_backend(self.backend_type, backend_name, api_key)
+
+        self.backend = self.backend_manager.set_backend(self.backend_type, backend_name, api_key, **kwargs)
 
     def text_chat(self, messages: list, **kwargs: dict[str, Any]) -> Any:
         """Send messages to the backend for text-based chatting.
@@ -35,7 +37,9 @@ class TextAI:
 
 
 class ImageAI:
-    def __init__(self, backend_name: Optional[str] = None, api_key: Optional[str] = None) -> None:
+    def __init__(
+        self, backend_name: Optional[str] = None, api_key: Optional[str] = None, **kwargs: dict[str, Any]
+    ) -> None:
         """Initialize an ImageAI instance with an optional backend and API key.
         If no backend is specified, the default backend is used.
         If no API key is specified, it is retrieved from the environment variables.
@@ -49,10 +53,9 @@ class ImageAI:
         self.backend_manager = BackendManager()
         self.backend_type = "image"
 
-        if backend_name:
-            self.backend = self.backend_manager.set_backend(self.backend_type, backend_name, api_key)
+        self.backend = self.backend_manager.set_backend(self.backend_type, backend_name, api_key, **kwargs)
 
-    def generate_image(self, messages: list, **kwargs: dict[str, Any]) -> Any:
+    def generate_image(self, prompt: str, **kwargs: dict[str, Any]) -> Any:
         """Generate images based on the provided messages.
 
         Args:
@@ -62,11 +65,13 @@ class ImageAI:
         Returns:
             Any: The generated images from the backend.
         """
-        return self.backend.generate_image(messages, **kwargs)
+        return self.backend.generate_image(prompt, **kwargs)
 
 
 class AudioAI:
-    def __init__(self, backend_name: Optional[str] = None, api_key: Optional[str] = None) -> None:
+    def __init__(
+        self, backend_name: Optional[str] = None, api_key: Optional[str] = None, **kwargs: dict[str, Any]
+    ) -> None:
         """Initialize an AudioAI instance with an optional backend and API key.
         If no backend is specified, the default backend is used.
         If no API key is specified, it is retrieved from the environment variables.
@@ -80,8 +85,7 @@ class AudioAI:
         self.backend_manager = BackendManager()
         self.backend_type = "audio"
 
-        if backend_name:
-            self.backend = self.backend_manager.set_backend(self.backend_type, backend_name, api_key)
+        self.backend = self.backend_manager.set_backend(self.backend_type, backend_name, api_key, **kwargs)
 
     def voice_to_text(
         self,

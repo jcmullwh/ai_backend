@@ -90,9 +90,9 @@ class ConfigManager:
                 # Otherwise, simply set the value in the target dictionary.
                 target[key] = value
 
-    def set_default(self, service: str, value: dict[str, Any]) -> None:
+    def set_default(self, service: str, **kwargs: dict[str, Any]) -> None:
         """
-        Set the default configuration for a service.
+        Change default configuration for a service.
 
         Args:
             service (str): The name of the service.
@@ -101,17 +101,16 @@ class ConfigManager:
         Raises:
             TypeError: If the provided value is not a dictionary.
         """
-        if isinstance(value, dict):
-            self.config[service] = value
-        else:
-            # Log and raise an error if the value is not a dictionary.
-            error_message = f"Invalid type for '{service}'. Expected dict, got {type(value).__name__}."
+        if service is None:
+            error_message = "Service name cannot be None."
             self.logger.error(error_message)
-            raise TypeError(error_message)
+            raise ValueError(error_message)
 
-    def add_default(self, service: str, value: dict[str, Any]) -> None:
+        self.config[service] = self.combine_config(service, **kwargs)
+
+    def add_default(self, service: str, params: dict[str, Any]) -> None:
         """
-        Add a new default configuration for a service.
+        Add a new default parameter for a service.
 
         Args:
             service (str): The name of the service.
@@ -127,19 +126,35 @@ class ConfigManager:
             self.logger.error(error_message)
             raise ValueError(error_message)
 
-        if value is None:
-            error_message = "Value cannot be None."
+        for key, value in params.items():
+            if key not in self.config[service]:
+                self.config[service][key] = value
+            else:
+                # Log and raise an error if the value is not a dictionary.
+                error_message = f"{key} already exists in '{service}'."
+                self.logger.error(error_message)
+                raise TypeError(error_message)
+
+    def add_service(self, service: str, params: dict[str, Any]) -> None:
+        """
+        Add a new service configuration.
+
+        Args:
+            service (str): The name of the service.
+            value (dict[str, Any]): The default configuration dictionary for the service.
+
+        Raises:
+            TypeError: If the provided value is not a dictionary.
+            ValueError: If a configuration for the service already exists.
+        """
+        # if service is none, raise an error
+        if service is None:
+            error_message = "Service name cannot be None."
             self.logger.error(error_message)
             raise ValueError(error_message)
 
         if service not in self.config:
-            if isinstance(value, dict):
-                self.config[service] = value
-            else:
-                # Log and raise an error if the value is not a dictionary.
-                error_message = f"Invalid type for '{service}'. Expected dict, got {type(value).__name__}."
-                self.logger.error(error_message)
-                raise TypeError(error_message)
+            self.config[service] = params
         else:
             # Log and raise an error if the service already has a configuration.
             error_message = f"Configuration for '{service}' already exists."
@@ -201,6 +216,15 @@ class AIBackend(ABC):
 
         self.client = self.create_client(api_key)
         self.config_manager = config_manager
+
+    def set_default(self, service: str, **kwargs: dict[str, Any]) -> None:
+        self.config_manager.set_default(service, **kwargs)
+
+    def add_default(self, service: str, **kwargs: dict[str, Any]) -> None:
+        self.config_manager.add_default(service, **kwargs)
+
+    def add_service(self, service: str, config: dict[str, Any]) -> None:
+        self.config_manager.add_service(service, config)
 
     @abstractmethod
     def get_env_var_name(self) -> str:

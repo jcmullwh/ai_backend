@@ -11,7 +11,7 @@ class OpenAIImageConfigManager(ConfigManager):
         self.config = {
             "image_generation": {
                 "model": "dall-e-3",
-                "size": "1024x1792",
+                "size": "1792x1024",
                 "quality": "hd",
                 "n": 1,
             }
@@ -20,8 +20,8 @@ class OpenAIImageConfigManager(ConfigManager):
 
 
 class OpenAIImageBackend(ImageInterface, OpenAIBackend):
-    def __init__(self, api_key: Optional[str] = None) -> None:
-        super().__init__(OpenAIImageConfigManager(), api_key)
+    def __init__(self, api_key: Optional[str] = None, **kwargs: dict[str, Any]) -> None:
+        super().__init__(OpenAIImageConfigManager(**kwargs), api_key)
 
     def generate_image(self, prompt: str, **kwargs: dict[str, Any]) -> Any:
         config = self.config_manager.combine_config("image_generation", **kwargs)
