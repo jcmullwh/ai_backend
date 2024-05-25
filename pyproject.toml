@@ -1,7 +1,7 @@
 [project]
-name = "ai-backend"
+name = "ai_backend"
 authors = [
-  { name = "ai-backend", email = "jason@na.com" }
+  { name = "ai_backend", email = "jason@na.com" }
 ]
 description = "A simple interface to easily swap between AI providers and models when building prototypes"
 readme = "README.md"
@@ -20,8 +20,8 @@ dependencies = [
 
 
 [project.urls]
-Documentation = "https://jcmullwh.github.io/ai-backend/"
-Source = "https://github.com/ai-backend"
+Documentation = "https://jcmullwh.github.io/ai_backend/"
+Source = "https://github.com/ai_backend"
 
 
 [tool.mypy]
