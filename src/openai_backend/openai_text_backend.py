@@ -8,7 +8,7 @@ class OpenAITextConfigManager(ConfigManager):
     def __init__(self, **kwargs: dict[str, Any]) -> None:
         super().__init__()
         # Initialize default configurations for chat operations
-        self.config = {"chat": {"model": "gpt-4", "temperature": 0.2}, "embedding": {"model": "text-embedding-ada-002"}}
+        self.config = {"chat": {"model": "gpt-4o", "temperature": 0.2}, "embedding": {"model": "text-embedding-ada-002"}}
         self.update_config(**kwargs)
 
 
