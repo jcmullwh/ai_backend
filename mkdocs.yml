@@ -1,8 +1,8 @@
 site_name: AI Backend
 site_description: A simple interface to easily swap between AI providers and models when building prototypes
 
-repo_url: https://github.com/ai-backend
-repo_name: ai-backend
+repo_url: https://github.com/ai_backend
+repo_name: ai_backend
 
 theme:
     name: material

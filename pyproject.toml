@@ -1,7 +1,7 @@
 [project]
-name = "ai-backend"
+name = "ai_backend"
 authors = [
-  { name = "ai-backend", email = "jason@na.com" }
+  { name = "ai_backend", email = "jason@na.com" }
 ]
 description = "A simple interface to easily swap between AI providers and models when building prototypes"
 readme = "README.md"
@@ -11,15 +11,21 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
+    "pydub>=0.25.1",
+    "fuzzywuzzy>=0.18.0",
+    "retrying>=1.3.4",
+    "openai>=1.30.1",
 ]
 
+
+
 [project.urls]
-Documentation = "https://jcmullwh.github.io/ai-backend/"
-Source = "https://github.com/ai-backend"
+Documentation = "https://jcmullwh.github.io/ai_backend/"
+Source = "https://github.com/ai_backend"
 
 
 [tool.mypy]
-files = ["ai_backend"]
+files = ["src"]
 disallow_untyped_defs = true
 disallow_any_unimported = true
 no_implicit_optional = true
@@ -27,7 +33,6 @@ check_untyped_defs = true
 warn_return_any = true
 warn_unused_ignores = true
 show_error_codes = true
-
 
 [tool.ruff]
 target-version = "py39"
@@ -77,9 +82,17 @@ ignore = [
     "PLR0915",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# Ignore assert statements in test files
+"tests/test_*.py" = ["S101"]
+
 [tool.pytest.ini_options]
 addopts = "--cov=ai_backend/ --cov-report=term-missing"
 asyncio_mode = "strict"
+markers = [
+    "live_api: mark a test as a live API test to run only on demand."
+]
+testpaths = ["tests"]
 
 
 [tool.pdm.dev-dependencies]
@@ -103,8 +116,9 @@ docs = [
 
 
 [tool.pdm.scripts]
-test = "pytest"
-test-cov-xml = "pytest --cov-report=xml"
+test = "pytest -m 'not live_api'"
+test-live = "pytest -m live_api"
+test-cov-xml = "pytest -m 'not live_api' --cov-report=xml"
 lint = "scripts/lint.py"
 lint-check = "scripts/lint-check.py"
 docs-serve = "mkdocs serve"
