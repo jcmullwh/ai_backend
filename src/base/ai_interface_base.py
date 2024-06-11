@@ -1,6 +1,6 @@
 import io
 from abc import ABC, abstractmethod
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 
 class AudioInterface(ABC):
@@ -56,7 +56,7 @@ class AudioInterface(ABC):
 
 class TextInterface(ABC):
     @abstractmethod
-    def text_chat(self, messages: list, **kwargs: dict[str, Any]) -> Any:
+    def text_chat(self, messages: list, response_type: Optional[str] = None, **kwargs: dict[str, Any]) -> Any:
         """
         Processes a chat interaction based on a list of messages.
 
