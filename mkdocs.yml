@@ -56,7 +56,7 @@ plugins:
 
 watch:
     - docs
-    - ai_backend
+    - src
 
 nav:
     - About: index.md
