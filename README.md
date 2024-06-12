@@ -25,7 +25,7 @@ Kind of like a slice of LangChain but not absolutely terrible.
 
 ---
 
-###Examples
+### Examples
 
 ```python
 
@@ -44,7 +44,7 @@ text_ai.set_default("text_chat",model="gpt-4o")
 
 also_gpt_4o_response = text_ai.text_chat(messages)
 
-respones_with_a_bunch_of_settings = text_ai.text_chat(messages,
+response_with_a_bunch_of_settings = text_ai.text_chat(messages,
                                             frequency_penalty=1.1,
                                             max_tokens=42,
                                             presence_penalty=1.2,
@@ -60,6 +60,9 @@ default_google_response = text_ai.text_chat(messages)
 ```
 
 ---
+
+### Status
+
 Basic Functionality:
 - [x] OpenAI Backend
 - [x] Capability API
