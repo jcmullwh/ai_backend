@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
     types: [opened, reopened, synchronize, edited]
+    
+permissions:
+  contents: read
 
 jobs:
   update-draft:
