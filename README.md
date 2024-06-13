@@ -5,7 +5,7 @@
 </p>
 
 [![build](https://github.com/ai_backend/workflows/Build/badge.svg)](https://github.com/ai_backend/actions)
-[![codecov](https://codecov.io/gh/ai_backend/branch/master/graph/badge.svg)](https://codecov.io/gh/ai_backend)
+[![codecov](https://codecov.io/github/jcmullwh/ai_backend/branch/main/graph/badge.svg?token=ZOE3PNF04X)](https://codecov.io/github/jcmullwh/ai_backend)
 [![PyPI version](https://badge.fury.io/py/ai_backend.svg)](https://badge.fury.io/py/ai_backend)
 
 ---
