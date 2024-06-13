@@ -3,7 +3,7 @@ name = "ai_backend"
 authors = [
   { name = "ai_backend", email = "jason@na.com" }
 ]
-description = "A simple interface to easily swap between AI providers and models when building prototypes"
+description = "A simple interface to easily swap between AI providers and models"
 readme = "README.md"
 dynamic = ["version"]
 classifiers = [
