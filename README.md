@@ -29,7 +29,7 @@ Kind of like a slice of LangChain but not absolutely terrible.
 
 ```python
 
-text_ai = TextAI()
+text_ai = TextAI(backend="openai")
 
 messages = [
     {"role": "system", "content": "You are a helpful assistant."},
@@ -53,7 +53,7 @@ response_with_a_bunch_of_settings = text_ai.text_chat(messages,
 
 # Future:
 
-text_ai.set_backend("Google")
+text_ai.set_backend("google")
 
 default_google_response = text_ai.text_chat(messages)
 
