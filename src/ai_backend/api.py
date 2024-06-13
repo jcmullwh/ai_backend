@@ -35,7 +35,7 @@ class TextAI:
 
     def set_backend(
         self, backend: Optional[str] = None, api_key: Optional[str] = None, **kwargs: dict[str, Any]
-    ) -> None:
+    ) -> Any:
         """Set the backend to be used for text-based AI operations.
 
         Args:
@@ -43,7 +43,7 @@ class TextAI:
             api_key (str): The API key for the backend.
             **kwargs (dict[str, Any]): Additional keyword arguments specific to the backend.
         """
-        self.backend = self.backend_manager.set_backend(self.backend_type, backend, api_key, **kwargs)
+        backend_class, backend_name = self.backend_manager.set_backend(self.backend_type, backend, api_key, **kwargs)
 
 
 class ImageAI:
@@ -61,7 +61,7 @@ class ImageAI:
         self.backend_manager = BackendManager()
         self.backend_type = "image"
 
-        self.backend, self.backend_name = self.set_backend(backend, api_key, **kwargs)
+        self.set_backend(backend, api_key, **kwargs)
 
     def generate_image(self, prompt: str, **kwargs: dict[str, Any]) -> Any:
         """Generate images based on the provided messages.
@@ -85,7 +85,9 @@ class ImageAI:
             api_key (str): The API key for the backend.
             **kwargs (dict[str, Any]): Additional keyword arguments specific to the backend.
         """
-        self.backend = self.backend_manager.set_backend(self.backend_type, backend, api_key, **kwargs)
+        self.backend, self.backend_name = self.backend_manager.set_backend(
+            self.backend_type, backend, api_key, **kwargs
+        )
 
 
 class AudioAI:
@@ -103,7 +105,7 @@ class AudioAI:
         self.backend_manager = BackendManager()
         self.backend_type = "audio"
 
-        self.backend, self.backend_name = self.set_backend(backend, api_key, **kwargs)
+        self.set_backend(backend, api_key, **kwargs)
 
     def voice_to_text(
         self,
@@ -131,4 +133,6 @@ class AudioAI:
             api_key (str): The API key for the backend.
             **kwargs (dict[str, Any]): Additional keyword arguments specific to the backend.
         """
-        self.backend = self.backend_manager.set_backend(self.backend_type, backend, api_key, **kwargs)
+        self.backend, self.backend_name = self.backend_manager.set_backend(
+            self.backend_type, backend, api_key, **kwargs
+        )

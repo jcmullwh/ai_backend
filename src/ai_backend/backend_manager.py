@@ -24,7 +24,7 @@ class BackendManager:
             "image": "openai",
             "audio": "openai",
         }
-        
+
         self.backend_class = None
 
     def set_backend(
@@ -43,7 +43,7 @@ class BackendManager:
             else:
                 error_message = f"Backend {backend_name} not supported for Backend Type {backend_type}."
                 raise ValueError(error_message)
-            
+
             return backend_class(api_key=api_key, **kwargs), backend_name
         else:
             error_message = f"Backend Type {backend_type} not supported."
