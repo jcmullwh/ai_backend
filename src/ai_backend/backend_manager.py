@@ -24,6 +24,8 @@ class BackendManager:
             "image": "openai",
             "audio": "openai",
         }
+        
+        self.backend_class = None
 
     def set_backend(
         self,
@@ -35,23 +37,14 @@ class BackendManager:
         if backend_type in self.backends:
             if backend_name in self.backends[backend_type]:
                 backend_class = self.backends[backend_type][backend_name]
-                self.current_backend = backend_class
-                return backend_class(api_key=api_key, **kwargs)
             elif backend_name is None:
                 backend_name = self.default_backend[backend_type]
                 backend_class = self.backends[backend_type][backend_name]
-                self.current_backend = backend_class
-                return backend_class(api_key=api_key, **kwargs)
             else:
                 error_message = f"Backend {backend_name} not supported for Backend Type {backend_type}."
                 raise ValueError(error_message)
+            
+            return backend_class(api_key=api_key, **kwargs), backend_name
         else:
             error_message = f"Backend Type {backend_type} not supported."
             raise ValueError(error_message)
-
-    def get_backend(self) -> Any:
-        if not self.current_backend:
-            error_message = "No backend is currently set."
-            raise ValueError(error_message)
-        else:
-            return self.current_backend
