@@ -44,12 +44,26 @@ text_ai.set_default("text_chat",model="gpt-4o")
 
 also_gpt_4o_response = text_ai.text_chat(messages)
 
-response_with_a_bunch_of_settings = text_ai.text_chat(messages,
+# At any point, parameters can be passed as kwargs.
+# If it's a call to the model it will use these parameters.
+
+response_with_a_bunch_of_parameters = text_ai.text_chat(messages,
                                             frequency_penalty=1.1,
                                             max_tokens=42,
                                             presence_penalty=1.2,
                                             n=4,
                                             )
+
+# Parameters can be set as default at initialization and using set_default()
+
+new_text_ai = TextAI(frequency_penalty=1.1)
+
+response_with_modified_frequency_penalty = new_text_ai(messages)
+
+new_text_ai.set_default(frequency_penalty=1)
+
+response_with_frequency_penalty_1 = new_text_ai(messages)
+
 
 # Future:
 
@@ -70,6 +84,7 @@ Basic Functionality:
 - [x] Image
 - [ ] Audio
 - [ ] 90% Test Coverage
+- [ ] Clear Logging of all changes to model parameters
 - [ ] Message/Memory Handling
 
 Addtional Backends:
