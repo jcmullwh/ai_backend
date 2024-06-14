@@ -66,8 +66,10 @@ default_google_response = text_ai.text_chat(messages)
 Basic Functionality:
 - [x] OpenAI Backend
 - [x] Capability API
-- [x] Text Capability
-- [x] Image Capability
+- [x] Text
+- [x] Image
+- [ ] Audio
+- [ ] 90% Test Coverage
 - [ ] Message/Memory Handling
 
 Addtional Backends:
@@ -79,7 +81,6 @@ Addtional Backends:
 - [ ] Midjourney
 
 Additional Capabilities:
-- [ ] Audio
 - [ ] Functions
 - [ ] Embeddings
 
