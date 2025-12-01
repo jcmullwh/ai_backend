@@ -19,7 +19,7 @@ class TextAI:
         self.backend_manager = BackendManager()
         self.backend_type = "text"
 
-        self.backend, self.backend_name = self.set_backend(backend, api_key, **kwargs)
+        self.set_backend(backend, api_key, **kwargs)
 
     def text_chat(self, messages: list, **kwargs: dict[str, Any]) -> Any:
         """Send messages to the backend for text-based chatting.
@@ -31,7 +31,7 @@ class TextAI:
         Returns:
             Any: The response from the backend.
         """
-        return self.backend.text_chat(messages, **kwargs)
+        self.backend, self.backend_name = self.backend.text_chat(messages, **kwargs)
 
     def set_backend(
         self, backend: Optional[str] = None, api_key: Optional[str] = None, **kwargs: dict[str, Any]
@@ -43,7 +43,7 @@ class TextAI:
             api_key (str): The API key for the backend.
             **kwargs (dict[str, Any]): Additional keyword arguments specific to the backend.
         """
-        backend_class, backend_name = self.backend_manager.set_backend(self.backend_type, backend, api_key, **kwargs)
+        return self.backend_manager.set_backend(self.backend_type, backend, api_key, **kwargs)
 
 
 class ImageAI:
