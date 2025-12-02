@@ -5,7 +5,13 @@ from ai_backend.backend_manager import BackendManager
 
 
 class TextAI:
-    def __init__(self, backend: Optional[str] = None, api_key: Optional[str] = None, **kwargs: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        backend: Optional[str] = None,
+        api_key: Optional[str] = None,
+        env_var_name: Optional[str] = None,
+        **kwargs: Any,
+    ) -> None:
         """Initialize a TextAI instance with an option to specify backend and API key.
         If no backend is specified, the default backend is used.
         If no API key is specified, it is retrieved from the environment variables.
@@ -15,11 +21,12 @@ class TextAI:
                 If None, the default backend is used.
             api_key (Optional[str]): The API key for accessing the specified backend.
                 If None, it attempts to retrieve from the environment variables.
+            env_var_name (Optional[str]): Custom environment variable name for the API key.
         """
         self.backend_manager = BackendManager()
         self.backend_type = "text"
 
-        self.set_backend(backend, api_key, **kwargs)
+        self.set_backend(backend=backend, api_key=api_key, env_var_name=env_var_name, **kwargs)
 
     def text_chat(self, messages: list, **kwargs: dict[str, Any]) -> Any:
         """Send messages to the backend for text-based chatting.
@@ -31,23 +38,39 @@ class TextAI:
         Returns:
             Any: The response from the backend.
         """
-        self.backend, self.backend_name = self.backend.text_chat(messages, **kwargs)
+        return self.backend.text_chat(messages, **kwargs)
 
     def set_backend(
-        self, backend: Optional[str] = None, api_key: Optional[str] = None, **kwargs: dict[str, Any]
+        self,
+        backend: Optional[str] = None,
+        backend_name: Optional[str] = None,
+        api_key: Optional[str] = None,
+        env_var_name: Optional[str] = None,
+        **kwargs: Any,
     ) -> Any:
         """Set the backend to be used for text-based AI operations.
 
         Args:
             backend (str): The name of the backend to set.
             api_key (str): The API key for the backend.
+            env_var_name (Optional[str]): Custom environment variable name for the API key.
             **kwargs (dict[str, Any]): Additional keyword arguments specific to the backend.
         """
-        return self.backend_manager.set_backend(self.backend_type, backend, api_key, **kwargs)
+        selected_backend = backend_name if backend_name is not None else backend
+        self.backend, self.backend_name = self.backend_manager.set_backend(
+            self.backend_type, selected_backend, api_key, env_var_name=env_var_name, **kwargs
+        )
+        return self.backend
 
 
 class ImageAI:
-    def __init__(self, backend: Optional[str] = None, api_key: Optional[str] = None, **kwargs: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        backend: Optional[str] = None,
+        api_key: Optional[str] = None,
+        env_var_name: Optional[str] = None,
+        **kwargs: Any,
+    ) -> None:
         """Initialize an ImageAI instance with an optional backend and API key.
         If no backend is specified, the default backend is used.
         If no API key is specified, it is retrieved from the environment variables.
@@ -57,11 +80,12 @@ class ImageAI:
                 If None, the default backend is used.
             api_key (Optional[str]): The API key for accessing the specified backend.
                 If None, it attempts to retrieve from the environment variables.
+            env_var_name (Optional[str]): Custom environment variable name for the API key.
         """
         self.backend_manager = BackendManager()
         self.backend_type = "image"
 
-        self.set_backend(backend, api_key, **kwargs)
+        self.set_backend(backend=backend, api_key=api_key, env_var_name=env_var_name, **kwargs)
 
     def generate_image(self, prompt: str, **kwargs: dict[str, Any]) -> Any:
         """Generate images based on the provided messages.
@@ -76,22 +100,35 @@ class ImageAI:
         return self.backend.generate_image(prompt, **kwargs)
 
     def set_backend(
-        self, backend: Optional[str] = None, api_key: Optional[str] = None, **kwargs: dict[str, Any]
+        self,
+        backend: Optional[str] = None,
+        backend_name: Optional[str] = None,
+        api_key: Optional[str] = None,
+        env_var_name: Optional[str] = None,
+        **kwargs: Any,
     ) -> None:
         """Set the backend to be used for image-based AI operations.
 
         Args:
             backend (str): The name of the backend to set.
             api_key (str): The API key for the backend.
+            env_var_name (Optional[str]): Custom environment variable name for the API key.
             **kwargs (dict[str, Any]): Additional keyword arguments specific to the backend.
         """
+        selected_backend = backend_name if backend_name is not None else backend
         self.backend, self.backend_name = self.backend_manager.set_backend(
-            self.backend_type, backend, api_key, **kwargs
+            self.backend_type, selected_backend, api_key, env_var_name=env_var_name, **kwargs
         )
 
 
 class AudioAI:
-    def __init__(self, backend: Optional[str] = None, api_key: Optional[str] = None, **kwargs: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        backend: Optional[str] = None,
+        api_key: Optional[str] = None,
+        env_var_name: Optional[str] = None,
+        **kwargs: Any,
+    ) -> None:
         """Initialize an AudioAI instance with an optional backend and API key.
         If no backend is specified, the default backend is used.
         If no API key is specified, it is retrieved from the environment variables.
@@ -101,11 +138,12 @@ class AudioAI:
                 If None, the default backend is used.
             api_key (Optional[str]): The API key for accessing the specified backend.
                 If None, it attempts to retrieve from the environment variables.
+            env_var_name (Optional[str]): Custom environment variable name for the API key.
         """
         self.backend_manager = BackendManager()
         self.backend_type = "audio"
 
-        self.set_backend(backend, api_key, **kwargs)
+        self.set_backend(backend=backend, api_key=api_key, env_var_name=env_var_name, **kwargs)
 
     def voice_to_text(
         self,
@@ -124,15 +162,22 @@ class AudioAI:
         return self.backend.voice_to_text(audio_input, **kwargs)
 
     def set_backend(
-        self, backend: Optional[str] = None, api_key: Optional[str] = None, **kwargs: dict[str, Any]
+        self,
+        backend: Optional[str] = None,
+        backend_name: Optional[str] = None,
+        api_key: Optional[str] = None,
+        env_var_name: Optional[str] = None,
+        **kwargs: Any,
     ) -> None:
         """Set the backend to be used for audio-based AI operations.
 
         Args:
             backend (str): The name of the backend to set.
             api_key (str): The API key for the backend.
+            env_var_name (Optional[str]): Custom environment variable name for the API key.
             **kwargs (dict[str, Any]): Additional keyword arguments specific to the backend.
         """
+        selected_backend = backend_name if backend_name is not None else backend
         self.backend, self.backend_name = self.backend_manager.set_backend(
-            self.backend_type, backend, api_key, **kwargs
+            self.backend_type, selected_backend, api_key, env_var_name=env_var_name, **kwargs
         )

@@ -6,4 +6,4 @@ __version__ = "0.1.0"
 
 from .api import AudioAI, ImageAI, TextAI
 
-__all__ = ["TextAI", "ImageAI", "AudioAI"]
+__all__ = ["AudioAI", "ImageAI", "TextAI"]
