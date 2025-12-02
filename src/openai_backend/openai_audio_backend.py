@@ -2,10 +2,11 @@ import io
 import logging
 from typing import Any, Optional, Union
 
-from base.ai_base import ConfigManager, OpenAIBackend
-from base.ai_interface_base import AudioInterface
 from fuzzywuzzy import fuzz  # type: ignore
 from pydub import AudioSegment  # type: ignore
+
+from base.ai_base import ConfigManager, OpenAIBackend
+from base.ai_interface_base import AudioInterface
 
 logger = logging.getLogger(__name__)
 
@@ -14,16 +15,22 @@ class OpenAIAudioConfigManager(ConfigManager):
     def __init__(self, **kwargs: dict[str, Any]) -> None:
         super().__init__()
         self.config = {
-            "transcription": {"model": "whisper-1", "response_format": "verbose_json", "timestamps": ["segment"]},
-            "text_to_speech": {"model": "tts-model", "voice": "default-voice"},
+            "transcription": {
+                "model": "gpt-4o-transcribe",
+                "response_format": "verbose_json",
+                "timestamps": ["segment"],
+            },
+            "text_to_speech": {"model": "gpt-4o-mini-tts", "voice": "alloy"},
         }
 
         self.update_config(**kwargs)
 
 
 class OpenAIAudioBackend(AudioInterface, OpenAIBackend):
-    def __init__(self, api_key: Optional[str] = None, **kwargs: dict[str, Any]) -> None:
-        super().__init__(OpenAIAudioConfigManager(**kwargs), api_key)
+    def __init__(
+        self, api_key: Optional[str] = None, env_var_name: Optional[str] = None, **kwargs: dict[str, Any]
+    ) -> None:
+        super().__init__(OpenAIAudioConfigManager(**kwargs), api_key, env_var_name)
 
     def voice_to_text(
         self,
@@ -79,7 +86,7 @@ class OpenAIAudioBackend(AudioInterface, OpenAIBackend):
     def find_best_overlap(self, stitched_text: str, current_text: str, overlap: int = 200) -> int:
         best_ratio = 0
         best_index = -1
-        max_length = min(int(round(overlap)), len(stitched_text), len(current_text))
+        max_length = min(overlap, len(stitched_text), len(current_text))
 
         for i in range(50, max_length):
             ratio = fuzz.partial_ratio(stitched_text[-i:], current_text[:i])
@@ -100,11 +107,16 @@ class OpenAIAudioBackend(AudioInterface, OpenAIBackend):
         return stitched_text.strip()
 
     def text_to_speech(self, text: str, **kwargs: Any) -> Optional[Union[bytes, io.BytesIO]]:
+        config = self.config_manager.combine_config("text_to_speech", **kwargs)
         try:
             response = self.client.audio.speech.create(
-                model=kwargs.get("model", "tts-model"), voice=kwargs.get("voice", "default-voice"), input=text
+                input=text,
+                **config,
             )
-            return io.BytesIO(response.audio)
+            audio_bytes = response.read() if hasattr(response, "read") else getattr(response, "audio", None)
+            if audio_bytes is None:
+                return None
+            return io.BytesIO(audio_bytes)
         except Exception as e:
             logger.error(f"Text-to-speech API error: {e!s}")
             return None

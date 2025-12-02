@@ -97,7 +97,8 @@ class ImageInterface(ABC):
                       resolution, and specific parameters for the generation model being used.
 
         Returns:
-            str: A URL or path to the generated image.
+            dict: {"url": Optional[str], "image": Optional[str]} where url is a link (if provided by the provider)
+                  and image is a base64-encoded string or similar payload (if provided by the provider).
         """
         pass
 

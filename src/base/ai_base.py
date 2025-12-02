@@ -246,11 +246,14 @@ class AIBackend(ABC):
 
 
 class OpenAIBackend(AIBackend):
-    def __init__(self, config_manager: ConfigManager, api_key: Optional[str]) -> None:
+    def __init__(
+        self, config_manager: ConfigManager, api_key: Optional[str], env_var_name: Optional[str] = None
+    ) -> None:
+        self._env_var_name = env_var_name or "OPENAI_API_KEY"
         super().__init__(config_manager, api_key)
 
     def get_env_var_name(self) -> str:
-        return "OPENAI_API_KEY"
+        return self._env_var_name
 
     def create_client(self, api_key: str) -> Client:
         return OpenAI(api_key=api_key)

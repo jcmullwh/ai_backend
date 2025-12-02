@@ -1,4 +1,5 @@
 import pytest
+
 from ai_backend import ImageAI, TextAI
 
 
@@ -10,7 +11,7 @@ def test_live_text_chat():
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "This is a test message. Please respond with 'Test response'."},
     ]
-    response = text_ai.text_chat(messages)
+    response = text_ai.text_chat(messages, model="gpt-5.1")
     # Check if the response is not None and is a string
     assert response is not None and isinstance(response, str)
 
@@ -23,7 +24,7 @@ def test_live_text_chat_modified_config():
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "This is a test message. Please respond with 'Test response'."},
     ]
-    response = text_ai.text_chat(messages, temperature=0.5, max_tokens=50)
+    response = text_ai.text_chat(messages, temperature=0.5, max_tokens=50, model="gpt-5.1")
     # Check if the response is not None and is a string
     assert response is not None and isinstance(response, str)
 
@@ -34,8 +35,9 @@ def test_live_generate_image():
 
     prompt = "create an image appropriate for an API image test"
     response = image_ai.generate_image(prompt)
-    # Check if the response is not None and is a string
-    assert response is not None and isinstance(response, str)
+    assert response is not None and isinstance(response, dict)
+    assert set(response.keys()) == {"url", "image"}
+    assert (response["url"] is None) != (response["image"] is None)
 
 
 """

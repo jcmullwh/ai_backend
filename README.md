@@ -38,11 +38,11 @@ messages = [
 
 default_model_response = text_ai.text_chat(messages)
 
-gpt_4o_response = text_ai.text_chat(messages, model="gpt-4o")
+gpt_5_1_response = text_ai.text_chat(messages, model="gpt-5.1")
 
-text_ai.set_default("text_chat",model="gpt-4o")
+text_ai.set_default("chat", model="gpt-5.1")
 
-also_gpt_4o_response = text_ai.text_chat(messages)
+also_gpt_5_1_response = text_ai.text_chat(messages)
 
 # At any point, parameters can be passed as kwargs.
 # If it's a call to the model it will use these parameters.
@@ -71,6 +71,46 @@ text_ai.set_backend("google")
 
 default_google_response = text_ai.text_chat(messages)
 
+```
+
+---
+
+### OpenAI text calls
+
+For modern OpenAI text models (e.g., GPT-4.x / GPT-5.x), `TextAI.text_chat` now uses the Responses API under the hood. Older models still fall back to Chat Completions. The public `text_chat` interface is unchanged—keep passing a `messages` list and receive a string (or `"full"` for the full object).
+
+---
+
+### Default OpenAI models
+
+- Text chat: gpt-5.1 (temperature 0.2)
+- Embeddings: text-embedding-3-large
+- Image generation: dall-e-3 (1024x1024, standard quality)
+- Audio: gpt-4o-transcribe (verbose_json, segment timestamps) and gpt-4o-mini-tts (voice alloy)
+
+---
+
+### PDM scripts
+
+Defined under `[tool.pdm.scripts]` in `pyproject.toml` (run with `pdm run <name>`):
+
+- `test`: run pytest while skipping `live_api` tests.
+- `test-live`: run only the `live_api`-marked suite.
+- `test-cov-xml`: same as `test` but emits an XML coverage report.
+- `lint`: execute the project lint script (`scripts/lint.py`).
+- `lint-check`: lint in check/CI mode (`scripts/lint-check.py`).
+- `docs-serve`: serve docs locally via `mkdocs serve`.
+- `docs-build`: build static docs via `mkdocs build`.
+
+```toml
+[tool.pdm.scripts]
+test = "pytest -m 'not live_api'"
+test-live = "pytest -m live_api"
+test-cov-xml = "pytest -m 'not live_api' --cov-report=xml"
+lint = "scripts/lint.py"
+lint-check = "scripts/lint-check.py"
+docs-serve = "mkdocs serve"
+docs-build = "mkdocs build"
 ```
 
 ---

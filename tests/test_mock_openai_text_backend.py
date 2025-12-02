@@ -1,11 +1,19 @@
 from unittest.mock import Mock, patch
 
 import pytest
+
 from openai_backend.openai_text_backend import OpenAITextBackend
+
+MAX_OUTPUT_TOKENS = 12
 
 
 @pytest.fixture
 def mock_openai_client():
+    mock_responses_text = "Hello from responses"
+    mock_responses_content = Mock(text=mock_responses_text)
+    mock_responses_output = Mock(content=[mock_responses_content])
+    mock_responses_response = Mock(output=[mock_responses_output])
+
     mock_chat_response = Mock()
     mock_chat_response.choices = [
         Mock(
@@ -19,12 +27,15 @@ def mock_openai_client():
 
     # Setup the mock response for embeddings
     mock_embeddings_response = Mock()
-    mock_embeddings_response.data = [0.1, 0.2, 0.3]
+    mock_embeddings_response.data = [{"embedding": [0.1, 0.2, 0.3]}]
 
     # Setup the mock client
     mock_client = Mock()
     mock_client.chat.completions.create.return_value = mock_chat_response
+    mock_client.responses.create.return_value = mock_responses_response
     mock_client.embeddings.create.return_value = mock_embeddings_response
+
+    mock_client.mock_responses_text = mock_responses_text
 
     return mock_client
 
@@ -36,42 +47,81 @@ def text_backend(mock_openai_client):
         yield backend
 
 
-def test_text_chat_success(text_backend, mock_openai_client):
-    # Test successful text chat
+@pytest.fixture
+def messages():
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Hello, OpenAI!"},
     ]
+    return messages
 
-    response = text_backend.text_chat(messages)
+
+def test_modern_model_uses_responses(text_backend, mock_openai_client, messages):
+    response = text_backend.text_chat(messages, model="gpt-4o")
+    assert response == mock_openai_client.mock_responses_text
+
+    mock_openai_client.responses.create.assert_called_once()
+    mock_openai_client.chat.completions.create.assert_not_called()
+
+    call_kwargs = mock_openai_client.responses.create.call_args.kwargs
+    assert call_kwargs["model"] == "gpt-4o"
+    assert call_kwargs["input"] == messages
+    assert call_kwargs["temperature"] == text_backend.config_manager.config["chat"]["temperature"]
+
+
+def test_legacy_model_uses_chat(text_backend, mock_openai_client, messages):
+    response = text_backend.text_chat(messages, model="gpt-3.5-turbo")
     assert response == "\n\nHello there, how may I assist you today?"
 
-    # Verify that the chat.completions.create method was called with the correct arguments
-    mock_openai_client.chat.completions.create.assert_called_once_with(
-        messages=messages, **text_backend.config_manager.config["chat"]
-    )
+    mock_openai_client.chat.completions.create.assert_called_once()
+    mock_openai_client.responses.create.assert_not_called()
+
+    call_kwargs = mock_openai_client.chat.completions.create.call_args.kwargs
+    assert call_kwargs["model"] == "gpt-3.5-turbo"
+    assert call_kwargs["messages"] == messages
 
 
-def test_text_modified_config(text_backend, mock_openai_client):
-    # Test successful text chat
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Hello, OpenAI!"},
-    ]
+def test_override_forces_responses(text_backend, mock_openai_client, messages):
+    text_backend.text_chat(messages, model="gpt-3.5-turbo", use_responses=True)
 
-    response = text_backend.text_chat(messages, model="gpt-7", sassiness=11)
+    mock_openai_client.responses.create.assert_called_once()
+    mock_openai_client.chat.completions.create.assert_not_called()
+    assert mock_openai_client.responses.create.call_args.kwargs["model"] == "gpt-3.5-turbo"
+
+
+def test_override_forces_chat(text_backend, mock_openai_client, messages):
+    text_backend.text_chat(messages, model="gpt-5.1", use_responses=False)
+
+    mock_openai_client.chat.completions.create.assert_called_once()
+    mock_openai_client.responses.create.assert_not_called()
+    assert mock_openai_client.chat.completions.create.call_args.kwargs["model"] == "gpt-5.1"
+
+
+def test_responses_return_value(text_backend, mock_openai_client, messages):
+    response = text_backend.text_chat(messages, model="gpt-4o")
+    assert response == mock_openai_client.mock_responses_text
+
+    full_response = text_backend.text_chat(messages, model="gpt-4o", response_type="full")
+    assert full_response is mock_openai_client.responses.create.return_value
+
+
+def test_chat_return_value(text_backend, mock_openai_client, messages):
+    response = text_backend.text_chat(messages, model="gpt-3.5-turbo")
     assert response == "\n\nHello there, how may I assist you today?"
 
-    modified_config = text_backend.config_manager.config["chat"].copy()
-    modified_config["model"] = "gpt-7"
-    modified_config["sassiness"] = 11
-
-    # Verify that the chat.completions.create method was called with the correct arguments
-    mock_openai_client.chat.completions.create.assert_called_once_with(messages=messages, **modified_config)
+    full_response = text_backend.text_chat(messages, model="gpt-3.5-turbo", response_type="full")
+    assert full_response is mock_openai_client.chat.completions.create.return_value.choices[0]
 
 
-def test_text_chat_exception(text_backend):
+def test_max_tokens_maps_to_max_output_tokens(text_backend, mock_openai_client, messages):
+    text_backend.text_chat(messages, model="gpt-4o", max_tokens=MAX_OUTPUT_TOKENS)
+
+    call_kwargs = mock_openai_client.responses.create.call_args.kwargs
+    assert call_kwargs["max_output_tokens"] == MAX_OUTPUT_TOKENS
+    assert "max_tokens" not in call_kwargs
+
+
+def test_text_chat_exception(text_backend, messages):
     with patch.object(text_backend.client.chat.completions, "create", side_effect=Exception("API Error")):
-        # The function in your backend to handle text chat should handle the exception
-        response = text_backend.text_chat(["Hello, OpenAI!"])
+        response = text_backend.text_chat(messages, model="gpt-3.5-turbo")
         assert response is None

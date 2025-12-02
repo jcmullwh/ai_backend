@@ -11,8 +11,8 @@ class OpenAIImageConfigManager(ConfigManager):
         self.config = {
             "image_generation": {
                 "model": "dall-e-3",
-                "size": "1792x1024",
-                "quality": "hd",
+                "size": "1024x1024",
+                "quality": "standard",
                 "n": 1,
             }
         }
@@ -20,27 +20,35 @@ class OpenAIImageConfigManager(ConfigManager):
 
 
 class OpenAIImageBackend(ImageInterface, OpenAIBackend):
-    def __init__(self, api_key: Optional[str] = None, **kwargs: dict[str, Any]) -> None:
-        super().__init__(OpenAIImageConfigManager(**kwargs), api_key)
+    def __init__(
+        self, api_key: Optional[str] = None, env_var_name: Optional[str] = None, **kwargs: dict[str, Any]
+    ) -> None:
+        super().__init__(OpenAIImageConfigManager(**kwargs), api_key, env_var_name)
 
-    def generate_image(self, prompt: str, **kwargs: dict[str, Any]) -> Any:
+    def generate_image(self, prompt: str, **kwargs: dict[str, Any]) -> dict[str, Optional[str]]:
         config = self.config_manager.combine_config("image_generation", **kwargs)
 
         try:
             response = self.client.images.generate(prompt=prompt, **config)
-            return response.data[0].url
+            result = response.data[0]
+            url = getattr(result, "url", None)
+            image = getattr(result, "b64_json", None)
+            return {"url": url, "image": image}
         except Exception as e:
             self.log_error("Image generation API error", e)
-            return None
+            raise
 
-    def image_edit(self, image_url: str, edit_options: dict[str, Any], **kwargs: dict[str, Any]) -> Any:  # noqa: ARG002
+    def image_edit(self, image_url: str, edit_options: dict[str, Any], **kwargs: dict[str, Any]) -> Any:
+        _ = (image_url, edit_options, kwargs)
         message = "Image edit method not implemented yet"
         raise NotImplementedError(message)
 
-    def image_variation(self, image_url: str, variation_options: dict[str, Any], **kwargs: dict[str, Any]) -> Any:  # noqa: ARG002
+    def image_variation(self, image_url: str, variation_options: dict[str, Any], **kwargs: dict[str, Any]) -> Any:
+        _ = (image_url, variation_options, kwargs)
         message = "Generate variation method not implemented yet"
         raise NotImplementedError(message)
 
-    def image_to_text(self, image_url: str, **kwargs: dict[str, Any]) -> Any:  # noqa: ARG002
+    def image_to_text(self, image_url: str, **kwargs: dict[str, Any]) -> Any:
+        _ = (image_url, kwargs)
         message = "Image to text method not implemented yet"
         raise NotImplementedError(message)

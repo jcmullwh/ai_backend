@@ -1,4 +1,5 @@
 import pytest
+
 from openai_backend.openai_text_backend import OpenAITextBackend
 
 
@@ -9,7 +10,7 @@ def test_live_text_chat():
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Hello, OpenAI!"},
     ]
-    response = text_backend.text_chat(messages)
+    response = text_backend.text_chat(messages, model="gpt-5.1")
     # Check if the response is not None and is a string
     assert response is not None and isinstance(response, str)
 
