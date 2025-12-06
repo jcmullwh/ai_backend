@@ -5,7 +5,7 @@
 groups = ["default", "dev", "docs", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:cc8cd02e06b01febd65b2e0e7924a4a1b909e97000eea117de1a779dc28894ff"
+content_hash = "sha256:7afc2a9b1d2c561354fa2b05c3c8dabed2a9425a306a40efcf173b8778826c61"
 
 [[metadata.targets]]
 requires_python = ">=3.13"
@@ -587,6 +587,15 @@ groups = ["default"]
 files = [
     {file = "distro-1.9.0-py3-none-any.whl", hash = "sha256:7bffd925d65168f85027d8da9af6bddab658135b840670a223589bc0c8ef02b2"},
     {file = "distro-1.9.0.tar.gz", hash = "sha256:2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed"},
+]
+
+[[package]]
+name = "ffmpeg"
+version = "1.4"
+summary = "ffmpeg python package url [https://github.com/jiashaokun/ffmpeg]"
+groups = ["default"]
+files = [
+    {file = "ffmpeg-1.4.tar.gz", hash = "sha256:6931692c890ff21d39938433c2189747815dca0c60ddc7f9bb97f199dba0b5b9"},
 ]
 
 [[package]]
