@@ -28,7 +28,7 @@ class TextAI:
 
         self.set_backend(backend=backend, api_key=api_key, env_var_name=env_var_name, **kwargs)
 
-    def text_chat(self, messages: list, **kwargs: dict[str, Any]) -> Any:
+    def text_chat(self, messages: list, **kwargs: Any) -> Any:
         """Send messages to the backend for text-based chatting.
 
         Args:
@@ -87,7 +87,7 @@ class ImageAI:
 
         self.set_backend(backend=backend, api_key=api_key, env_var_name=env_var_name, **kwargs)
 
-    def generate_image(self, prompt: str, **kwargs: dict[str, Any]) -> Any:
+    def generate_image(self, prompt: str, **kwargs: Any) -> Any:
         """Generate images based on the provided messages.
 
         Args:

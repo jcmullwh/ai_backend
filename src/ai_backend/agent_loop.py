@@ -45,8 +45,9 @@ Limitations:
 from __future__ import annotations
 
 import json
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple
+from typing import Any
 
 from ai_backend.api import TextAI
 
@@ -73,16 +74,16 @@ class AgentRunResult:
         steps: Number of model steps executed (i.e. number of calls to TextAI.text_chat).
     """
 
-    messages: List[Dict[str, Any]]
-    final_content: Optional[str]
+    messages: list[dict[str, Any]]
+    final_content: str | None
     stop_reason: str
     steps: int
 
 
 def run_agentic_chat(
     text_ai: TextAI,
-    messages: List[Dict[str, Any]],
-    tools: Iterable[Dict[str, Any]],
+    messages: list[dict[str, Any]],
+    tools: Iterable[dict[str, Any]],
     tool_registry: ToolRegistry,
     *,
     max_steps: int = 8,
@@ -127,7 +128,7 @@ def run_agentic_chat(
     """
 
     tools_list = list(tools)
-    last_signature: Optional[Tuple[str, str]] = None
+    last_signature: tuple[str, str] | None = None
     repeated_count = 0
 
     for step in range(1, max_steps + 1):
@@ -152,12 +153,12 @@ def run_agentic_chat(
                 steps=step,
             )
 
-        assistant_msg: Dict[str, Any] = {
+        assistant_msg: dict[str, Any] = {
             "role": "assistant",
             "content": msg.content or "",
             "tool_calls": [],
         }
-        tool_result_messages: List[Dict[str, Any]] = []
+        tool_result_messages: list[dict[str, Any]] = []
 
         for tc in tool_calls:
             tool_name = tc.function.name
@@ -170,14 +171,15 @@ def run_agentic_chat(
                 last_signature = signature
                 repeated_count = 1
 
-            args: Optional[Dict[str, Any]] = None
+            args: dict[str, Any] | None = None
             result: Any
 
             try:
                 args = json.loads(raw_args)
                 if not isinstance(args, dict):
-                    raise ValueError("Tool arguments JSON must be an object")
-            except Exception as exc:  # noqa: BLE001
+                    error_message = "Tool arguments JSON must be an object"
+                    raise ValueError(error_message)
+            except Exception as exc:
                 # Surface JSON parsing errors back to the model.
                 result = {
                     "error": "invalid_tool_arguments",
@@ -191,7 +193,7 @@ def run_agentic_chat(
                 else:
                     try:
                         result = func(**args)
-                    except Exception as exc:  # noqa: BLE001
+                    except Exception as exc:
                         # Keep going even if tool execution fails.
                         result = {
                             "error": "tool_execution_error",

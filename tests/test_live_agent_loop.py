@@ -34,8 +34,7 @@ def test_agent_loop_live_round_trip() -> None:
         {
             "role": "system",
             "content": (
-                "You can call an 'add' tool that sums two integers. "
-                "Always call it instead of doing the math yourself."
+                "You can call an 'add' tool that sums two integers. Always call it instead of doing the math yourself."
             ),
         },
         {"role": "user", "content": "Use your tool to add 2 and 3."},

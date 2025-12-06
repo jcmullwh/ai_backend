@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
-
-import pytest
+from typing import Any, Callable
 
 from ai_backend import ToolRegistry, run_agentic_chat
 
@@ -12,7 +10,7 @@ from ai_backend import ToolRegistry, run_agentic_chat
 @dataclass
 class FakeFunction:
     name: str
-    arguments: Optional[str]
+    arguments: str | None
 
 
 @dataclass
@@ -24,8 +22,8 @@ class FakeToolCall:
 
 @dataclass
 class FakeMessage:
-    content: Optional[str]
-    tool_calls: Optional[List[FakeToolCall]] = None
+    content: str | None
+    tool_calls: list[FakeToolCall] | None = None
 
 
 @dataclass
@@ -36,15 +34,17 @@ class FakeChoice:
 class FakeTextAI:
     def __init__(
         self,
-        responses: Optional[List[FakeMessage]] = None,
+        responses: list[FakeMessage] | None = None,
         *,
-        response_fn: Optional[Callable[[List[Dict[str, Any]]], FakeMessage]] = None,
+        response_fn: Callable[[list[dict[str, Any]]], FakeMessage] | None = None,
     ) -> None:
         self._responses = responses or []
         self._response_fn = response_fn
         self.calls = 0
 
-    def text_chat(self, messages: List[Dict[str, Any]], **kwargs: Dict[str, Any]) -> FakeChoice:
+    def text_chat(self, messages: list[dict[str, Any]], **kwargs: dict[str, Any]) -> FakeChoice:
+        _ = kwargs  # kwargs are accepted for API compatibility but unused in the fake
+
         if self._response_fn is not None:
             msg = self._response_fn(messages)
         else:
@@ -81,11 +81,14 @@ def test_single_tool_call_then_final_answer() -> None:
     ]
     registry: ToolRegistry = {"add": add}
 
+    expected_steps = 2
+    expected_sum = 5
+
     first = FakeMessage(content="", tool_calls=[make_tool_call("call-1", "add", '{"a": 2, "b": 3}')])
     second = FakeMessage(content="The result is 5.", tool_calls=None)
     text_ai = FakeTextAI(responses=[first, second])
 
-    messages: List[Dict[str, Any]] = [
+    messages: list[dict[str, Any]] = [
         {"role": "system", "content": "Use tools"},
         {"role": "user", "content": "Add 2 and 3"},
     ]
@@ -95,7 +98,7 @@ def test_single_tool_call_then_final_answer() -> None:
 
     assert result.stop_reason == "done"
     assert result.final_content == "The result is 5."
-    assert result.steps == 2
+    assert result.steps == expected_steps
 
     tool_call_msg = messages[start_len]
     tool_result_msg = messages[start_len + 1]
@@ -103,7 +106,7 @@ def test_single_tool_call_then_final_answer() -> None:
 
     assert tool_call_msg["tool_calls"][0]["function"]["name"] == "add"
     assert json.loads(tool_call_msg["tool_calls"][0]["function"]["arguments"]) == {"a": 2, "b": 3}
-    assert json.loads(tool_result_msg["content"]) == 5
+    assert json.loads(tool_result_msg["content"]) == expected_sum
     assert final_msg["content"] == "The result is 5."
 
 
@@ -120,6 +123,10 @@ def test_multiple_tool_calls_in_one_step() -> None:
     ]
     registry: ToolRegistry = {"add": add, "multiply": multiply}
 
+    expected_steps = 2
+    expected_add = 3
+    expected_multiply = 12
+
     first = FakeMessage(
         content="",
         tool_calls=[
@@ -130,7 +137,7 @@ def test_multiple_tool_calls_in_one_step() -> None:
     second = FakeMessage(content="done", tool_calls=None)
     text_ai = FakeTextAI(responses=[first, second])
 
-    messages: List[Dict[str, Any]] = [
+    messages: list[dict[str, Any]] = [
         {"role": "system", "content": "chain tools"},
         {"role": "user", "content": "add then multiply"},
     ]
@@ -139,27 +146,28 @@ def test_multiple_tool_calls_in_one_step() -> None:
     result = run_agentic_chat(text_ai, messages, tools, registry)
 
     assert result.stop_reason == "done"
-    assert result.steps == 2
+    assert result.steps == expected_steps
     assert result.final_content == "done"
 
     assistant_tool_msg = messages[start_len]
     first_tool_msg = messages[start_len + 1]
     second_tool_msg = messages[start_len + 2]
+    expected_tool_calls = 2
 
-    assert len(assistant_tool_msg["tool_calls"]) == 2
+    assert len(assistant_tool_msg["tool_calls"]) == expected_tool_calls
     assert first_tool_msg["name"] == "add"
-    assert json.loads(first_tool_msg["content"]) == 3
+    assert json.loads(first_tool_msg["content"]) == expected_add
     assert second_tool_msg["name"] == "multiply"
-    assert json.loads(second_tool_msg["content"]) == 12
+    assert json.loads(second_tool_msg["content"]) == expected_multiply
 
 
 def test_direct_answer_no_tools_used() -> None:
-    tools: List[Dict[str, Any]] = []
+    tools: list[dict[str, Any]] = []
     registry: ToolRegistry = {}
     final_message = FakeMessage(content="Hi!", tool_calls=None)
     text_ai = FakeTextAI(responses=[final_message])
 
-    messages: List[Dict[str, Any]] = [{"role": "user", "content": "Say hi"}]
+    messages: list[dict[str, Any]] = [{"role": "user", "content": "Say hi"}]
 
     result = run_agentic_chat(text_ai, messages, tools, registry)
 
@@ -182,7 +190,7 @@ def test_unknown_tool_name_is_reported() -> None:
     second = FakeMessage(content="Final answer.", tool_calls=None)
     text_ai = FakeTextAI(responses=[first, second])
 
-    messages: List[Dict[str, Any]] = [{"role": "user", "content": "call missing"}]
+    messages: list[dict[str, Any]] = [{"role": "user", "content": "call missing"}]
     result = run_agentic_chat(text_ai, messages, tools, registry)
 
     assert result.stop_reason == "done"
@@ -196,7 +204,8 @@ def test_unknown_tool_name_is_reported() -> None:
 
 def test_tool_execution_error_is_captured() -> None:
     def boom() -> None:
-        raise RuntimeError("kaboom")
+        error_message = "kaboom"
+        raise RuntimeError(error_message)
 
     tools = [
         {
@@ -210,7 +219,7 @@ def test_tool_execution_error_is_captured() -> None:
     second = FakeMessage(content="done", tool_calls=None)
     text_ai = FakeTextAI(responses=[first, second])
 
-    messages: List[Dict[str, Any]] = [{"role": "user", "content": "trigger"}]
+    messages: list[dict[str, Any]] = [{"role": "user", "content": "trigger"}]
     result = run_agentic_chat(text_ai, messages, tools, registry)
 
     assert result.stop_reason == "done"
@@ -235,7 +244,7 @@ def test_invalid_json_arguments_are_handled() -> None:
     second = FakeMessage(content="all done", tool_calls=None)
     text_ai = FakeTextAI(responses=[first, second])
 
-    messages: List[Dict[str, Any]] = [{"role": "user", "content": "bad args"}]
+    messages: list[dict[str, Any]] = [{"role": "user", "content": "bad args"}]
     result = run_agentic_chat(text_ai, messages, tools, registry)
 
     assert result.stop_reason == "done"
@@ -258,12 +267,14 @@ def test_repeated_tool_call_safeguard_triggers() -> None:
 
     text_ai = FakeTextAI(response_fn=lambda _messages: repeated_message)
 
-    messages: List[Dict[str, Any]] = [{"role": "user", "content": "loop"}]
+    expected_steps = 2
+
+    messages: list[dict[str, Any]] = [{"role": "user", "content": "loop"}]
     result = run_agentic_chat(text_ai, messages, tools, registry, max_same_tool_calls=2)
 
     assert result.stop_reason == "repeated_tool_call"
     assert result.final_content is None
-    assert result.steps == 2
+    assert result.steps == expected_steps
 
 
 def test_max_steps_safeguard_triggers() -> None:
@@ -277,7 +288,7 @@ def test_max_steps_safeguard_triggers() -> None:
 
     counter = {"n": 0}
 
-    def response_fn(_messages: List[Dict[str, Any]]) -> FakeMessage:
+    def response_fn(_messages: list[dict[str, Any]]) -> FakeMessage:
         counter["n"] += 1
         call_id = f"call-{counter['n']}"
         raw_args = json.dumps({"step": counter["n"]})
@@ -285,10 +296,12 @@ def test_max_steps_safeguard_triggers() -> None:
 
     text_ai = FakeTextAI(response_fn=response_fn)
 
-    messages: List[Dict[str, Any]] = [{"role": "user", "content": "never stop"}]
+    expected_steps = 3
+
+    messages: list[dict[str, Any]] = [{"role": "user", "content": "never stop"}]
     result = run_agentic_chat(text_ai, messages, tools, registry, max_steps=3, max_same_tool_calls=99)
 
     assert result.stop_reason == "max_steps"
     assert result.final_content is None
-    assert result.steps == 3
+    assert result.steps == expected_steps
     assert len(messages) == 1 + (result.steps * 2)

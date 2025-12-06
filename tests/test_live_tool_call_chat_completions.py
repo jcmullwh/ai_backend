@@ -123,7 +123,8 @@ def test_tool_round_trip_with_chat_completions():
     )
 
     result = _run_add_tool_from_call(tool_call)
-    assert result == 12
+    expected_total = 12
+    assert result == expected_total
 
     messages.append(
         {
