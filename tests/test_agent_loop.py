@@ -6,7 +6,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 import pytest
 
-from ai_backend.agent_loop import AgentRunResult, ToolRegistry, run_agentic_chat
+from ai_backend import ToolRegistry, run_agentic_chat
 
 
 @dataclass

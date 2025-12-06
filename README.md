@@ -95,8 +95,7 @@ For modern OpenAI text models (e.g., GPT-4.x / GPT-5.x), `TextAI.text_chat` now 
 Use the built-in minimal agent loop to execute OpenAI-style function tools locally while driving Chat Completions:
 
 ```python
-from ai_backend import TextAI
-from ai_backend.agent_loop import run_agentic_chat, ToolRegistry
+from ai_backend import TextAI, ToolRegistry, run_agentic_chat
 
 def add(a: int, b: int) -> int:
     return a + b

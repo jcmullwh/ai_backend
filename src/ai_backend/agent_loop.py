@@ -97,6 +97,7 @@ def run_agentic_chat(
     - Repeatedly calls TextAI.text_chat with tools enabled.
     - Executes any tool calls returned by the model using the provided tool_registry.
     - Feeds tool results back into the conversation as tool messages.
+    - Appends to ``messages`` only; it never mutates existing entries.
     - Stops when the model returns an assistant message without tool_calls,
       or when a safety limit (max_steps / max_same_tool_calls) is reached.
 
@@ -110,8 +111,8 @@ def run_agentic_chat(
                        to the tool's JSON object arguments.
         max_steps: Maximum number of model calls (iterations) allowed in this loop.
         max_same_tool_calls: Maximum number of consecutive identical tool calls
-                             (same tool name and raw arguments) before the loop bails out
-                             with stop_reason="repeated_tool_call".
+                             (same tool name and raw JSON arguments) across steps before
+                             the loop bails out with stop_reason="repeated_tool_call".
         temperature: Temperature to pass to TextAI.text_chat.
 
     Returns:
