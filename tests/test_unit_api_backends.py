@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 
 from ai_backend.api import TextAI
@@ -62,3 +64,28 @@ def test_image_default_quality_is_supported():
     }
 
     assert quality in allowed_by_model.get(model, set())
+
+
+def test_textai_use_responses_false_skips_responses(monkeypatch):
+    chat_choice = Mock()
+    chat_choice.message = Mock(content="chat reply")
+    chat_completion = Mock(choices=[chat_choice])
+
+    mock_client = Mock()
+    mock_client.chat = Mock()
+    mock_client.chat.completions = Mock(create=Mock(return_value=chat_completion))
+    mock_client.responses = Mock(create=Mock())
+
+    monkeypatch.setattr(
+        "openai_backend.openai_text_backend.OpenAITextBackend.create_client",
+        lambda *_args, **_kwargs: mock_client,
+        raising=True,
+    )
+
+    text_ai = TextAI(backend_name="openai", api_key="test-key")
+
+    result = text_ai.text_chat([{"role": "user", "content": "hi"}], use_responses=False)
+
+    assert result == "chat reply"
+    mock_client.chat.completions.create.assert_called_once()
+    mock_client.responses.create.assert_not_called()

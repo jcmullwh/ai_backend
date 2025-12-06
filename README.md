@@ -90,6 +90,97 @@ For modern OpenAI text models (e.g., GPT-4.x / GPT-5.x), `TextAI.text_chat` now 
 
 ---
 
+### OpenAI tools (Chat Completions)
+
+You can prototype OpenAI tool/function calling without changing `ai_backend` by driving the Chat Completions path and doing a small loop in your app:
+
+```python
+import json
+from ai_backend import TextAI
+
+def add(a: int, b: int) -> int:
+    return a + b
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "add",
+            "description": "Add two integers.",
+            "parameters": {
+                "type": "object",
+                "properties": {"a": {"type": "integer"}, "b": {"type": "integer"}},
+                "required": ["a", "b"],
+            },
+        },
+    }
+]
+
+text_ai = TextAI()
+messages = [
+    {"role": "system", "content": "Use the 'add' tool when adding numbers."},
+    {"role": "user", "content": "What is 2 + 3?"},
+]
+
+# 1) Ask the model for a tool call (force Chat Completions)
+choice = text_ai.text_chat(
+    messages,
+    tools=tools,
+    tool_choice="auto",
+    response_type="full",
+    use_responses=False,  # required to avoid the Responses API, which does not surface tool_calls yet
+    temperature=0,
+)
+tool_call = choice.message.tool_calls[0]
+args = json.loads(tool_call.function.arguments)
+
+# 2) Run the Python function locally
+result = add(**args)
+
+# 3) Feed the tool result back and get the final answer
+messages.extend(
+    [
+        {
+            "role": "assistant",
+            "content": choice.message.content or "",
+            "tool_calls": [
+                {
+                    "id": tool_call.id,
+                    "type": "function",
+                    "function": {
+                        "name": tool_call.function.name,
+                        "arguments": tool_call.function.arguments,
+                    },
+                }
+            ],
+        },
+        {
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "name": "add",
+            "content": json.dumps({"result": result}),
+        },
+    ]
+)
+final = text_ai.text_chat(
+    messages,
+    tools=tools,
+    tool_choice="auto",
+    response_type="full",
+    use_responses=False,
+    temperature=0,
+)
+print(final.message.content)
+```
+
+Limitations (current state):
+- OpenAI-only; no tool support wired for other backends yet.
+- Must force Chat Completions (`use_responses=False` or a non–gpt-4/5 model); the Responses branch currently strips tool metadata.
+- Orchestration loop lives in your code; `TextAI` does not yet manage tool execution or message augmentation for you.
+- Live tests are marked `@pytest.mark.live_api` and expect a working OpenAI key.
+
+---
+
 ### PDM scripts
 
 Defined under `[tool.pdm.scripts]` in `pyproject.toml` (run with `pdm run <name>`):
