@@ -171,6 +171,7 @@ Basic Functionality:
 - [x] Capability API
 - [x] Text
 - [x] Image
+- [ ] Functions
 - [ ] Audio
 - [ ] 90% Test Coverage
 - [ ] Clear Logging of all changes to model parameters
@@ -185,7 +186,6 @@ Addtional Backends:
 - [ ] Midjourney
 
 Additional Capabilities:
-- [ ] Functions
 - [ ] Embeddings
 
 
