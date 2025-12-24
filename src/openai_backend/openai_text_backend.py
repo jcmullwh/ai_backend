@@ -9,7 +9,7 @@ class OpenAITextConfigManager(ConfigManager):
         super().__init__()
         # Initialize default configurations for chat operations
         self.config = {
-            "chat": {"model": "gpt-5.1", "temperature": 0.2},
+            "chat": {"model": "gpt-5.2", "temperature": 0.2},
             "embedding": {"model": "text-embedding-3-large"},
         }
         self.update_config(**kwargs)
